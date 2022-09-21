@@ -1,4 +1,4 @@
-# Create and Read with Flask-RESTful
+# Create and Retrieve with Flask-RESTful
 
 ## Learning Goals
 
