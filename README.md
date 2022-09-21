@@ -109,11 +109,10 @@ page:
 #!/usr/bin/env python3
 
 from flask import Flask, jsonify, request, make_response
-from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_restful import Api, Resource
 
-from models import db
+from models import db, Newsletter
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///db/newsletters.db'
@@ -128,6 +127,7 @@ api = Api(app)
 class Index(Resource):
 
     def get(self):
+        
         response_dict = {
             "index": "Welcome to the Newsletter RESTful API",
         }
@@ -136,6 +136,7 @@ class Index(Resource):
             jsonify(response_dict),
             200
         )
+
         return response
 
 api.add_resource(Index, '/')
@@ -143,7 +144,7 @@ api.add_resource(Index, '/')
 ```
 
 Run `flask run` from the `newsletters/` directory and you should see the
-following:
+following at [http://127.0.0.1:5000](http://127.0.0.1:5000):
 
 ```json
 {
@@ -159,11 +160,192 @@ and migrations have already been created for you. When you're ready, run
 `flask db upgrade` to create the database and `python seed.py` to seed it with
 fake data.
 
+***
+
+## Retrieving Records with Flask-RESTful
+
+Our index is a perfectly good example of a successful `GET` request, but it
+doesn't truly allow other people's applications to interact with our newsletter
+database. Let's set up another route, `/newsletters`, that returns all of the
+records from the `newsletters` table. Open `newsletters/app.py` and enter the
+following beneath your `Index` view:
+
+```py
+# newsletters/app.py
+
+class Newsletters(Resource):
+
+    def get(self):
+
+        response_dict_list = [n.to_dict() for n in Newsletter.query.all()]
+
+        response = make_response(
+            jsonify(response_dict_list),
+            200,
+        )
+
+        return response
+
+api.add_resource(Newsletters, '/newsletters')
+
+```
+
+While the outside structure of views in Flask-RESTful is quite different from
+vanilla Flask, the internal structure is virtually the same. We can write each
+of our views- for create, retrieve, update, and delete- just as we did before.
+The main difference here is that instead of each HTTP verb getting a code block
+inside of a view function, they each get an instance method inside of a
+`Resource` class.
+
+Run `flask run` from the `newsletters/` directory and you should see something
+similar to the following at [http://127.0.0.1:5000/newsletters](
+http://127.0.0.1:5000/newsletters):
+
+```json
+[
+  {
+    "body": "Create southern girl news. Image interesting mean professor federal agree. Clearly before seat threat during role provide.",
+    "edited_at": null,
+    "id": 1,
+    "published_at": "2022-09-21 18:35:17",
+    "title": "Establish they."
+  },
+  {
+    "body": "Really attack we ground production game. Late agency example local break start. Tell leader new above just before. Participant southern thousand win group dream reason.",
+    "edited_at": null,
+    "id": 2,
+    "published_at": "2022-09-21 18:35:17",
+    "title": "Plan wonder manage."
+  },
+  {
+    "body": "Will suffer choice impact. Audience happen write feel represent. Woman discover million kitchen. Although make little affect.",
+    "edited_at": null,
+    "id": 3,
+    "published_at": "2022-09-21 18:35:17",
+    "title": "Meet cut stuff."
+  },
+  ...
+]
+```
+
+***
+
 ## Creating Records with Flask-RESTful
+
+Let's move onto creating records with `POST` requests. Reopen
+`newsletters/app.py` and add the following to the bottom of the `Newsletter`
+class:
+
+```py
+# newsletters/app.py
+
+def post(self):
+    
+    new_record = Newsletter(
+        title=request.form['title'],
+        body=request.form['body'],
+    )
+
+    db.session.add(new_record)
+    db.session.commit()
+
+    response_dict = new_record.to_dict()
+
+    response = make_response(
+        jsonify(response_dict),
+        201,
+    )
+
+    return response
+
+```
+
+> **NOTE: We do NOT need to run the `add_resource()` method twice, as the `GET`
+> and `POST` routes are accessible through the same `Resource` and URL.**
+
+There's nothing you haven't seen before here: we retrieve form data through the
+request context, use it to create a new Newsletter record, commit that record to
+the database, then return it to the client with a 201 status code to denote that
+it was created successfully.
+
+Try it out for yourself: open Postman and navigate to
+[http://127.0.0.1:5000/newsletters](http://127.0.0.1:5000/newsletters). Change
+the request method to `POST`, edit the `Body > form-data` with a title and body,
+then hit submit. You should see a response similar to the following:
+
+```json
+{
+    "body": "This is the body of the newsletter entitled \"Mr. Title\".",
+    "edited_at": null,
+    "id": 51,
+    "published_at": "2022-09-21 19:16:31",
+    "title": "Mr. Title"
+}
+```
+
+***
+
+## Building Another Resource and Retrieving a Single Record
+
+We won't always want to read _every_ newsletter, so we should probably build
+a route to get a single record back from the database. There are a couple
+things to consider before we begin:
+
+1. A `GET` route already exists under `newsletters/`.
+2. Retrieving a single record means that we need some sort of **id**entifier.
+
+This means that we need to build a new `Resource` for this endpoint, and that
+it should include the `id` in the URL. Let's give it a shot!
+
+```py
+# newsletters/app.py
+
+class NewsletterByID(Resource):
+
+    def get(self, id):
+
+        response_dict = Newsletter.query.filter_by(id=id).first().to_dict()
+
+        response = make_response(
+            jsonify(response_dict),
+            200,
+        )
+
+        return response
+
+api.add_resource(NewsletterByID, '/newsletters/<int:id>')
+
+```
+
+Only two differences between this and our original `GET` route:
+
+1. We need to include `id` in our method's arguments and the resource URL.
+2. We need to chain some commands together to get the record with the provided
+   `id`.
+
+Check out this lesson's finished product: open Postman and navigate to
+[http://127.0.0.1:5000/newsletters/20](http://127.0.0.1:5000/newsletters/20).
+Make sure that your request method is `GET`, then click submit. You should see
+something similar to the following:
+
+```json
+{
+    "body": "College tax head change. Claim exactly because choose. Church edge center across test stock.",
+    "edited_at": null,
+    "id": 20,
+    "published_at": "2022-09-21 18:35:17",
+    "title": "Court probably not."
+}
+```
 
 ***
 
 ## Conclusion
+
+Flask-RESTful is a very simple tool that allows us to properly and effectively
+use HTTP request methods in our applications. Like other extensions, it reduces
+the amount of code you have to write to accomplish common tasks- and if you
+don't need to accomplish those common tasks, you can just leave it out!
 
 ***
 
