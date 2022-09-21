@@ -5,7 +5,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_restful import Api, Resource
 
-from models import db
+from models import db, Newsletter
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///db/newsletters.db'
@@ -26,11 +26,26 @@ class Index(Resource):
         
         response = make_response(
             jsonify(response_dict),
-            200
+            200,
         )
+
         return response
 
 api.add_resource(Index, '/')
+
+class Newsletters(Resource):
+
+    def get(self):
+        response_dict_list = [n.to_dict() for n in Newsletter.query.all()]
+
+        response = make_response(
+            jsonify(response_dict_list),
+            200,
+        )
+
+        return response
+
+api.add_resource(Newsletters, '/newsletters')
 
 
 # @app.route('/games')
