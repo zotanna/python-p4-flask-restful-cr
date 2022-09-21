@@ -11,6 +11,7 @@ flask-serializer = "*"
 flask-restful = "*"
 faker = "*"
 ipdb = "*"
+sqlalchemy-serializer = "*"
 
 [dev-packages]
 

@@ -90,7 +90,74 @@ determine which routes to create at the provided URL.
 `Api` and `Resource` aren't the only classes available to us through
 Flask-RESTful, but they're more than enough to get us started.
 
+### What's Missing?
+
+Because the `Resource` class and `create_resource` methods handle tasks normally
+carried out by the `@app.route()` decorator, we don't need to include the
+decorator itself. Remember though: if you add any non-RESTful views to your app,
+you still need `app.route()`!
+
 ***
+
+## Getting Started
+
+Enter your virtual environment with `pipenv install && pipenv shell`. Open
+`newsletters/app.py` and enter the following code to create a RESTful index
+page:
+
+```py
+#!/usr/bin/env python3
+
+from flask import Flask, jsonify, request, make_response
+from flask_sqlalchemy import SQLAlchemy
+from flask_migrate import Migrate
+from flask_restful import Api, Resource
+
+from models import db
+
+app = Flask(__name__)
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///db/newsletters.db'
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.config['JSONIFY_PRETTYPRINT_REGULAR'] = True
+
+migrate = Migrate(app, db)
+db.init_app(app)
+
+api = Api(app)
+
+class Index(Resource):
+
+    def get(self):
+        response_dict = {
+            "index": "Welcome to the Newsletter RESTful API",
+        }
+        
+        response = make_response(
+            jsonify(response_dict),
+            200
+        )
+        return response
+
+api.add_resource(Index, '/')
+
+```
+
+Run `flask run` from the `newsletters/` directory and you should see the
+following:
+
+```json
+{
+  "index": "Welcome to the Newsletter RESTful API"
+}
+```
+
+Congratulations on creating your first RESTful API endpoint!
+
+You'll notice that there are quite a few imports and lines of configuration that
+relate to databases- we'll be working with one in this lesson, but the models
+and migrations have already been created for you. When you're ready, run
+`flask db upgrade` to create the database and `python seed.py` to seed it with
+fake data.
 
 ## Creating Records with Flask-RESTful
 
