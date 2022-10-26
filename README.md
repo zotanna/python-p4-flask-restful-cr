@@ -68,7 +68,7 @@ the data here is returned in such a simple format, we can access it most easily
 from the command line with `curl`:
 
 ```console
-$ curl http://127.0.0.1:5000
+$ curl http://127.0.0.1:5000/newsletters
 # => {"newsletter: "it's a beautiful 108 out in Austin today"}
 ```
 
