@@ -232,7 +232,7 @@ http://127.0.0.1:5555/newsletters):
 ## Creating Records with Flask-RESTful
 
 Let's move onto creating records with `POST` requests. Reopen
-`newsletters/app.py` and add the following to the bottom of the `Newsletter`
+`newsletters/app.py` and add the following to the bottom of the `Newsletters`
 class:
 
 ```py
