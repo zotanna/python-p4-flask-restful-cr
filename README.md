@@ -58,7 +58,7 @@ class Newsletter(Resource):
 api.add_resource(Newsletter, '/newsletters')
 
 if __name__ == '__main__':
-    app.run()
+    app.run(port=5555)
 
 ```
 
@@ -68,7 +68,7 @@ the data here is returned in such a simple format, we can access it most easily
 from the command line with `curl`:
 
 ```console
-$ curl http://127.0.0.1:5000
+$ curl http://127.0.0.1:5555
 # => {"newsletter: "it's a beautiful 108 out in Austin today"}
 ```
 
@@ -114,7 +114,7 @@ from flask_restful import Api, Resource
 from models import db, Newsletter
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///db/newsletters.db'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///newsletters.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['JSONIFY_PRETTYPRINT_REGULAR'] = True
 
@@ -143,7 +143,7 @@ api.add_resource(Index, '/')
 ```
 
 Run `flask run` from the `newsletters/` directory and you should see the
-following at [http://127.0.0.1:5000](http://127.0.0.1:5000):
+following at [http://127.0.0.1:5555](http://127.0.0.1:5555):
 
 ```json
 {
@@ -197,8 +197,8 @@ inside of a view function, they each get an instance method inside of a
 `Resource` class.
 
 Run `flask run` from the `newsletters/` directory and you should see something
-similar to the following at [http://127.0.0.1:5000/newsletters](
-http://127.0.0.1:5000/newsletters):
+similar to the following at [http://127.0.0.1:5555/newsletters](
+http://127.0.0.1:5555/newsletters):
 
 ```json
 [
@@ -268,7 +268,7 @@ the database, then return it to the client with a 201 status code to denote that
 it was created successfully.
 
 Try it out for yourself: open Postman and navigate to
-[http://127.0.0.1:5000/newsletters](http://127.0.0.1:5000/newsletters). Change
+[http://127.0.0.1:5555/newsletters](http://127.0.0.1:5555/newsletters). Change
 the request method to `POST`, edit the `Body > form-data` with a title and body,
 then hit submit. You should see a response similar to the following:
 
@@ -323,7 +323,7 @@ Only two differences between this and our original `GET` route:
    `id`.
 
 Check out this lesson's finished product: open Postman and navigate to
-[http://127.0.0.1:5000/newsletters/20](http://127.0.0.1:5000/newsletters/20).
+[http://127.0.0.1:5555/newsletters/20](http://127.0.0.1:5555/newsletters/20).
 Make sure that your request method is `GET`, then click submit. You should see
 something similar to the following:
 
@@ -360,9 +360,9 @@ from flask_restful import Api, Resource
 from models import db, Newsletter
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///db/newsletters.db'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///newsletters.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.config['JSONIFY_PRETTYPRINT_REGULAR'] = True
+app.json.compact = False
 
 migrate = Migrate(app, db)
 db.init_app(app)
@@ -437,7 +437,7 @@ api.add_resource(NewsletterByID, '/newsletters/<int:id>')
 
 
 if __name__ == '__main__':
-    app.run()
+    app.run(port=5555)
 
 ```
 
