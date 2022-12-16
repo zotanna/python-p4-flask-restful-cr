@@ -100,14 +100,14 @@ you still need `app.route()`!
 
 ## Getting Started
 
-Enter your virtual environment with `pipenv install && pipenv shell`. Open
-`newsletters/app.py` and enter the following code to create a RESTful index
+Enter your virtual environment with `pipenv install; pipenv shell`. Open
+`server/app.py` and enter the following code to create a RESTful home
 page:
 
 ```py
 #!/usr/bin/env python3
 
-from flask import Flask, jsonify, request, make_response
+from flask import Flask, request, make_response
 from flask_migrate import Migrate
 from flask_restful import Api, Resource
 
@@ -116,38 +116,38 @@ from models import db, Newsletter
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///newsletters.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.config['JSONIFY_PRETTYPRINT_REGULAR'] = True
+app.json.compact = False
 
 migrate = Migrate(app, db)
 db.init_app(app)
 
 api = Api(app)
 
-class Index(Resource):
+class Home(Resource):
 
     def get(self):
         
         response_dict = {
-            "index": "Welcome to the Newsletter RESTful API",
+            "message": "Welcome to the Newsletter RESTful API",
         }
         
         response = make_response(
-            jsonify(response_dict),
+            response_dict,
             200
         )
 
         return response
 
-api.add_resource(Index, '/')
+api.add_resource(Home, '/')
 
 ```
 
-Run `flask run` from the `newsletters/` directory and you should see the
+Run `flask run` from the `server/` directory and you should see the
 following at [http://127.0.0.1:5555](http://127.0.0.1:5555):
 
 ```json
 {
-  "index": "Welcome to the Newsletter RESTful API"
+  "message": "Welcome to the Newsletter RESTful API"
 }
 ```
 
@@ -163,14 +163,14 @@ fake data.
 
 ## Retrieving Records with Flask-RESTful
 
-Our index is a perfectly good example of a successful `GET` request, but it
+Our homepage is a perfectly good example of a successful `GET` request, but it
 doesn't truly allow other people's applications to interact with our newsletter
 database. Let's set up another route, `/newsletters`, that returns all of the
-records from the `newsletters` table. Open `newsletters/app.py` and enter the
-following beneath your `Index` view:
+records from the `newsletters` table. Open `server/app.py` and enter the
+following beneath your `Home` view:
 
 ```py
-# newsletters/app.py
+# server/app.py
 
 class Newsletters(Resource):
 
@@ -179,7 +179,7 @@ class Newsletters(Resource):
         response_dict_list = [n.to_dict() for n in Newsletter.query.all()]
 
         response = make_response(
-            jsonify(response_dict_list),
+            response_dict_list,
             200,
         )
 
@@ -196,7 +196,7 @@ The main difference here is that instead of each HTTP verb getting a code block
 inside of a view function, they each get an instance method inside of a
 `Resource` class.
 
-Run `flask run` from the `newsletters/` directory and you should see something
+Run `flask run` from the `server/` directory and you should see something
 similar to the following at [http://127.0.0.1:5555/newsletters](
 http://127.0.0.1:5555/newsletters):
 
@@ -232,11 +232,11 @@ http://127.0.0.1:5555/newsletters):
 ## Creating Records with Flask-RESTful
 
 Let's move onto creating records with `POST` requests. Reopen
-`newsletters/app.py` and add the following to the bottom of the `Newsletters`
+`server/app.py` and add the following to the bottom of the `Newsletters`
 class:
 
 ```py
-# newsletters/app.py
+# server/app.py
 
 def post(self):
     
@@ -251,7 +251,7 @@ def post(self):
     response_dict = new_record.to_dict()
 
     response = make_response(
-        jsonify(response_dict),
+        response_dict,
         201,
     )
 
@@ -297,7 +297,7 @@ This means that we need to build a new `Resource` for this endpoint, and that
 it should include the `id` in the URL. Let's give it a shot!
 
 ```py
-# newsletters/app.py
+# server/app.py
 
 class NewsletterByID(Resource):
 
@@ -306,7 +306,7 @@ class NewsletterByID(Resource):
         response_dict = Newsletter.query.filter_by(id=id).first().to_dict()
 
         response = make_response(
-            jsonify(response_dict),
+            response_dict,
             200,
         )
 
@@ -353,7 +353,7 @@ don't need to accomplish those common tasks, you can just leave it out!
 ```py
 #!/usr/bin/env python3
 
-from flask import Flask, jsonify, request, make_response
+from flask import Flask, request, make_response
 from flask_migrate import Migrate
 from flask_restful import Api, Resource
 
@@ -369,22 +369,22 @@ db.init_app(app)
 
 api = Api(app)
 
-class Index(Resource):
+class Home(Resource):
 
     def get(self):
         
         response_dict = {
-            "index": "Welcome to the Newsletter RESTful API",
+            "message": "Welcome to the Newsletter RESTful API",
         }
         
         response = make_response(
-            jsonify(response_dict),
+            response_dict,
             200,
         )
 
         return response
 
-api.add_resource(Index, '/')
+api.add_resource(Home, '/')
 
 class Newsletters(Resource):
 
@@ -393,7 +393,7 @@ class Newsletters(Resource):
         response_dict_list = [n.to_dict() for n in Newsletter.query.all()]
 
         response = make_response(
-            jsonify(response_dict_list),
+            response_dict_list,
             200,
         )
 
@@ -412,7 +412,7 @@ class Newsletters(Resource):
         response_dict = new_record.to_dict()
 
         response = make_response(
-            jsonify(response_dict),
+            response_dict,
             201,
         )
 
@@ -427,7 +427,7 @@ class NewsletterByID(Resource):
         response_dict = Newsletter.query.filter_by(id=id).first().to_dict()
 
         response = make_response(
-            jsonify(response_dict),
+            response_dict,
             200,
         )
 
