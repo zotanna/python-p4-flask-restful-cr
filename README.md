@@ -100,8 +100,19 @@ you still need `app.route()`!
 
 ## Getting Started
 
-Enter your virtual environment with `pipenv install; pipenv shell`. Open
-`server/app.py` and enter the following code to create a RESTful home
+Enter your virtual environment with `pipenv install; pipenv shell`. If you
+prefer using a Flask environment to a script, enter the `server/` directory and
+run the following to configure your Flask environment:
+
+```console
+$ export FLASK_APP=app.py
+$ export FLASK_RUN_PORT=5555
+```
+
+Recall that the first command is not necessary if our app is contained in a file
+called `app.py`- it's a good habit to build nonetheless.
+
+Open `server/app.py` and enter the following code to create a RESTful home
 page:
 
 ```py
@@ -142,8 +153,8 @@ api.add_resource(Home, '/')
 
 ```
 
-Run `flask run` from the `server/` directory and you should see the
-following at [http://127.0.0.1:5555](http://127.0.0.1:5555):
+Run `flask run` (or `python app.py`) from the `server/` directory and you should
+see the following at [http://127.0.0.1:5555](http://127.0.0.1:5555):
 
 ```json
 {
@@ -281,6 +292,9 @@ then hit submit. You should see a response similar to the following:
     "title": "Mr. Title"
 }
 ```
+
+> **NOTE: `form-data` does not require the use of quotes for strings, and will
+> throw an error if you use them.**
 
 ***
 
