@@ -4,7 +4,7 @@
 
 - Build RESTful APIs that are easy to navigate and use in applications.
 
-***
+---
 
 ## Key Vocab
 
@@ -12,22 +12,22 @@
   applications that use HTTP in a consistent, human-readable, machine-readable
   way.
 - **Application Programming Interface (API)**: a software application that
-  allows two or more software applications to communicate with one another.
-  Can be standalone or incorporated into a larger product.
+  allows two or more software applications to communicate with one another. Can
+  be standalone or incorporated into a larger product.
 - **HTTP Request Method**: assets of HTTP requests that tell the server which
   actions the client is attempting to perform on the located resource.
 - **`GET`**: the most common HTTP request method. Signifies that the client is
   attempting to view the located resource.
 - **`POST`**: the second most common HTTP request method. Signifies that the
   client is attempting to submit a form to create a new resource.
-- **`PATCH`**: an HTTP request method that signifies that the client is attempting
-  to update a resource with new information.
+- **`PATCH`**: an HTTP request method that signifies that the client is
+  attempting to update a resource with new information.
 - **`PUT`**: an HTTP request method that signifies that the client is attempting
   to update a resource with new information contained in a complete record.
 - **`DELETE`**: an HTTP request method that signifies that the client is
   attempting to delete a resource.
 
-***
+---
 
 ## Introduction
 
@@ -36,7 +36,7 @@ but it's important to always seek out the best tools for the job. There are
 dozens of extensions designed exclusively for use with Flask, and one,
 [Flask-RESTful][frest], makes it _very_ easy to build RESTful APIs.
 
-***
+---
 
 ## Flask-RESTful Example
 
@@ -96,15 +96,21 @@ carried out by the `@app.route()` decorator, we don't need to include the
 decorator itself. Remember though: if you add any non-RESTful views to your app,
 you still need `app.route()`!
 
-***
+---
 
 ## Getting Started
 
-Enter your virtual environment with `pipenv install; pipenv shell`. If you
-prefer using a Flask environment to a script, enter the `server/` directory and
-run the following to configure your Flask environment:
+Enter your virtual environment with `pipenv install; pipenv shell`.
 
 ```console
+pipenv install && pipenv shell
+```
+
+If you prefer using a Flask environment to a script, enter the `server/`
+directory and run the following to configure your Flask environment:
+
+```console
+$ cd server
 $ export FLASK_APP=app.py
 $ export FLASK_RUN_PORT=5555
 ```
@@ -112,8 +118,7 @@ $ export FLASK_RUN_PORT=5555
 Recall that the first command is not necessary if our app is contained in a file
 called `app.py`- it's a good habit to build nonetheless.
 
-Open `server/app.py` and enter the following code to create a RESTful home
-page:
+Open `server/app.py` and enter the following code to create a RESTful home page:
 
 ```py
 #!/usr/bin/env python3
@@ -137,11 +142,11 @@ api = Api(app)
 class Home(Resource):
 
     def get(self):
-        
+
         response_dict = {
             "message": "Welcome to the Newsletter RESTful API",
         }
-        
+
         response = make_response(
             response_dict,
             200
@@ -150,6 +155,11 @@ class Home(Resource):
         return response
 
 api.add_resource(Home, '/')
+
+
+if __name__ == '__main__':
+    app.run(port=5555, debug=True)
+
 
 ```
 
@@ -167,10 +177,15 @@ Congratulations on creating your first RESTful API endpoint!
 You'll notice that there are quite a few imports and lines of configuration that
 relate to databases- we'll be working with one in this lesson, but the models
 and migrations have already been created for you. When you're ready, run
-`flask db upgrade` to create the database and `python seed.py` to seed it with
-fake data.
+`flask db upgrade` to create the database and `python seed.py` in the `server`
+directory to seed it with fake data.
 
-***
+```console
+$ flask db upgrade
+$ python seed.py
+```
+
+---
 
 ## Retrieving Records with Flask-RESTful
 
@@ -208,8 +223,8 @@ inside of a view function, they each get an instance method inside of a
 `Resource` class.
 
 Run `flask run` from the `server/` directory and you should see something
-similar to the following at [http://127.0.0.1:5555/newsletters](
-http://127.0.0.1:5555/newsletters):
+similar to the following at
+[http://127.0.0.1:5555/newsletters](http://127.0.0.1:5555/newsletters):
 
 ```json
 [
@@ -238,19 +253,16 @@ http://127.0.0.1:5555/newsletters):
 ]
 ```
 
-***
+---
 
 ## Creating Records with Flask-RESTful
 
-Let's move onto creating records with `POST` requests. Reopen
-`server/app.py` and add the following to the bottom of the `Newsletters`
-class:
+Let's move onto creating records with `POST` requests. Reopen `server/app.py`
+and add the following method to the bottom of the `Newsletters` class:
 
 ```py
 # server/app.py
-
 def post(self):
-    
     new_record = Newsletter(
         title=request.form['title'],
         body=request.form['body'],
@@ -267,7 +279,6 @@ def post(self):
     )
 
     return response
-
 ```
 
 > **NOTE: We do NOT need to run the `add_resource()` method twice, as the `GET`
@@ -285,30 +296,30 @@ then hit submit. You should see a response similar to the following:
 
 ```json
 {
-    "body": "This is the body of the newsletter entitled \"Mr. Title\".",
-    "edited_at": null,
-    "id": 51,
-    "published_at": "2022-09-21 19:16:31",
-    "title": "Mr. Title"
+  "body": "This is the body of the newsletter entitled \"Mr. Title\".",
+  "edited_at": null,
+  "id": 51,
+  "published_at": "2022-09-21 19:16:31",
+  "title": "Mr. Title"
 }
 ```
 
 > **NOTE: `form-data` does not require the use of quotes for strings, and will
 > throw an error if you use them.**
 
-***
+---
 
 ## Building Another Resource and Retrieving a Single Record
 
-We won't always want to read _every_ newsletter, so we should probably build
-a route to get a single record back from the database. There are a couple
-things to consider before we begin:
+We won't always want to read _every_ newsletter, so we should probably build a
+route to get a single record back from the database. There are a couple things
+to consider before we begin:
 
 1. A `GET` route already exists under `newsletters/`.
 2. Retrieving a single record means that we need some sort of **id**entifier.
 
-This means that we need to build a new `Resource` for this endpoint, and that
-it should include the `id` in the URL. Let's give it a shot!
+This means that we need to build a new `Resource` for this endpoint, and that it
+should include the `id` in the URL. Let's give it a shot!
 
 ```py
 # server/app.py
@@ -343,15 +354,15 @@ something similar to the following:
 
 ```json
 {
-    "body": "College tax head change. Claim exactly because choose. Church edge center across test stock.",
-    "edited_at": null,
-    "id": 20,
-    "published_at": "2022-09-21 18:35:17",
-    "title": "Court probably not."
+  "body": "College tax head change. Claim exactly because choose. Church edge center across test stock.",
+  "edited_at": null,
+  "id": 20,
+  "published_at": "2022-09-21 18:35:17",
+  "title": "Court probably not."
 }
 ```
 
-***
+---
 
 ## Conclusion
 
@@ -360,7 +371,7 @@ use HTTP request methods in our applications. Like other extensions, it reduces
 the amount of code you have to write to accomplish common tasks- and if you
 don't need to accomplish those common tasks, you can just leave it out!
 
-***
+---
 
 ## Solution Code
 
@@ -386,14 +397,14 @@ api = Api(app)
 class Home(Resource):
 
     def get(self):
-        
+
         response_dict = {
             "message": "Welcome to the Newsletter RESTful API",
         }
-        
+
         response = make_response(
             response_dict,
-            200,
+            200
         )
 
         return response
@@ -403,7 +414,7 @@ api.add_resource(Home, '/')
 class Newsletters(Resource):
 
     def get(self):
-        
+
         response_dict_list = [n.to_dict() for n in Newsletter.query.all()]
 
         response = make_response(
@@ -414,7 +425,6 @@ class Newsletters(Resource):
         return response
 
     def post(self):
-        
         new_record = Newsletter(
             title=request.form['title'],
             body=request.form['body'],
@@ -449,9 +459,8 @@ class NewsletterByID(Resource):
 
 api.add_resource(NewsletterByID, '/newsletters/<int:id>')
 
-
 if __name__ == '__main__':
-    app.run(port=5555)
+    app.run(port=5555, debug=True)
 
 ```
 
